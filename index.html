@@ -48,17 +48,17 @@ input[type=file]{display:none}
   cursor: pointer;
 }
 
-/* Caixa delimitada para o contexto */
+/* Caixa delimitada para o contexto com cores sóbrias */
 .context-box {
   background: #1f2937;
-  border: 1px dashed #4b5563;
+  border: 1px solid #374151;
   padding: 8px 12px;
   border-radius: 8px;
 }
 .context-title {
   font-size: 0.8rem;
-  font-weight: bold;
-  color: var(--accent);
+  font-weight: 600;
+  color: #9ca3af; /* Tom cinza discreto */
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 2px;
@@ -141,7 +141,7 @@ footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
       </label>
     </div>
 
-    <!-- Bloco claro e separado para o Contexto -->
+    <!-- Bloco de Contexto com visual neutro -->
     <div class="context-box">
       <span class="context-title">Falas de Contexto</span>
       <div style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
@@ -390,7 +390,7 @@ $("file").addEventListener("change", async e => {
 
     allSpeeches = parseParagraphs(paras);
 
-    if (!allSpeeces.length) {
+    if (!allSpeeches.length) {
       allSpeeches = paras.filter(x => x.trim()).map(x => ({ character: "(Identificação necessária)", text: x.trim() }));
     }
 
