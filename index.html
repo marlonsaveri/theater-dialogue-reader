@@ -22,7 +22,6 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .filelabel{display:inline-block;background:#374151}
 input[type=file]{display:none}
 
-/* Estilos de Opções e Seleção */
 .character-select-container, .options-container {
   display: flex;
   flex-direction: column;
@@ -61,7 +60,6 @@ input[type=file]{display:none}
 
 #stage{background:var(--panel);border:1px solid #374151;border-radius:20px;min-height:48vh;padding:clamp(22px,5vw,40px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;box-shadow:0 15px 50px #0003}
 
-/* Estilos do Bloco de Contexto */
 .context-block {
   display: flex;
   flex-direction: column;
@@ -70,7 +68,7 @@ input[type=file]{display:none}
 }
 .context-speech {
   font-size: clamp(0.85rem, 1.6vw, 1.1rem);
-  color: #6b7280;
+  color: #9ca3af;
   max-width: 850px;
   margin: auto;
   line-height: 1.35;
@@ -81,7 +79,6 @@ input[type=file]{display:none}
   text-transform: uppercase;
   font-size: 0.85em;
   margin-right: 4px;
-  color: #9ca3af;
 }
 
 #character{font-size:clamp(1.2rem,3vw,2rem);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
@@ -142,15 +139,12 @@ footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
   <div id="message">Abra seu arquivo Word para começar. O arquivo é processado no seu navegador.</div>
   
   <div id="stage" aria-live="polite">
-    <!-- Falas Anteriores -->
     <div id="prev-container" class="context-block"></div>
     
-    <!-- Fala Atual -->
     <div id="character">Pronto para ensaiar?</div>
     <div id="speech">Carregue o documento Word para ver uma fala de cada vez.</div>
     <div id="hint-message"></div>
     
-    <!-- Falas Posteriores -->
     <div id="next-container" class="context-block"></div>
   </div>
 
@@ -174,11 +168,23 @@ footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
 <script>
 let allSpeeches = [], speeches = [], index = 0, hidden = false;
 let detectedCharacters = [];
+let characterColors = {};
 
 const $ = id => document.getElementById(id);
 
 function norm(s) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+// Gera cores distintas baseadas no nome do personagem
+function generateColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = Math.abs(hash) % 360;
+  // Mantém saturação alta (75%) e luminosidade boa (65%) para destacar bem no fundo escuro
+  return `hsl(${h}, 75%, 65%)`;
 }
 
 function parseParagraphs(paragraphs) {
@@ -234,8 +240,9 @@ function updateCharacterCheckboxes() {
   container.appendChild(allLabel);
 
   detectedCharacters.forEach(char => {
+    const color = characterColors[norm(char)] || "#fbbf24";
     const lbl = document.createElement("label");
-    lbl.innerHTML = `<input type="checkbox" class="char-chk" value="${char}"> ${char}`;
+    lbl.innerHTML = `<input type="checkbox" class="char-chk" value="${char}"> <span style="color:${color}; font-weight:650;">${char}</span>`;
     container.appendChild(lbl);
   });
 
@@ -264,7 +271,6 @@ function applyFilter() {
   if (allChk.checked || selected.length === 0) {
     speeches = [...allSpeeches];
   } else {
-    // Mantém estritamente a ordem cronológica original do texto
     speeches = allSpeeches.filter(s => selected.includes(norm(s.character)));
   }
 
@@ -296,9 +302,10 @@ function render() {
   const startBefore = Math.max(0, globalIdx - numBefore);
   for (let i = startBefore; i < globalIdx; i++) {
     const prevItem = allSpeeches[i];
+    const prevColor = characterColors[norm(prevItem.character)] || "#9ca3af";
     const div = document.createElement("div");
     div.className = "context-speech";
-    div.innerHTML = `<span class="context-speaker">${prevItem.character}:</span> "${prevItem.text}"`;
+    div.innerHTML = `<span class="context-speaker" style="color:${prevColor}">${prevItem.character}:</span> "${prevItem.text}"`;
     prevContainer.appendChild(div);
   }
 
@@ -308,14 +315,17 @@ function render() {
   const endAfter = Math.min(allSpeeches.length - 1, globalIdx + numAfter);
   for (let i = globalIdx + 1; i <= endAfter; i++) {
     const nextItem = allSpeeches[i];
+    const nextColor = characterColors[norm(nextItem.character)] || "#9ca3af";
     const div = document.createElement("div");
     div.className = "context-speech";
-    div.innerHTML = `<span class="context-speaker">${nextItem.character}:</span> "${nextItem.text}"`;
+    div.innerHTML = `<span class="context-speaker" style="color:${nextColor}">${nextItem.character}:</span> "${nextItem.text}"`;
     nextContainer.appendChild(div);
   }
 
   // Renderizar Fala Atual
   $("character").textContent = item.character;
+  $("character").style.color = characterColors[norm(item.character)] || "#fbbf24";
+
   if (hidden) {
     $("speech").textContent = "••••••••••••••••••••";
     $("hint-message").textContent = "(Tente lembrar a fala e clique em “Revelar fala” ou aperte H)";
@@ -365,10 +375,12 @@ $("file").addEventListener("change", async e => {
     }
 
     const charMap = new Map();
+    characterColors = {};
     allSpeeches.forEach(s => {
       const nKey = norm(s.character);
       if (nKey && nKey !== "(identificacao necessaria)" && !charMap.has(nKey)) {
         charMap.set(nKey, s.character);
+        characterColors[nKey] = generateColor(s.character);
       }
     });
     detectedCharacters = Array.from(charMap.values());
