@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leitor de Falas — Teatro</title>
-<!-- Descrição que aparece nos resultados do Google -->
-  <meta name="description" content="Ferramenta gratuita para ensaio de roteiros e peças de teatro. Carregue seu arquivo Word (.docx), filtre falas por personagens e treine suas linhas.">
-  <meta name="keywords" content="teatro, ensaio de teatro, leitor de falas, memorizar texto, roteiro docx, atores">
-  <meta name="robots" content="index, follow">
+<title>Leitor de Falas de Teatro — Ferramenta para Ensaio de Atores</title>
+<meta name="description" content="Ferramenta gratuita para ensaio de roteiros e peças de teatro. Carregue seu arquivo Word (.docx), filtre falas por personagens e treine suas linhas.">
+<meta name="keywords" content="teatro, ensaio de teatro, leitor de falas, memorizar texto, roteiro docx, atores">
+<meta name="robots" content="index, follow">
 <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <style>
 :root { --bg:#111827; --panel:#1f2937; --muted:#9ca3af; --text:#f9fafb; --accent:#fbbf24; }
@@ -16,48 +15,65 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-appl
 header{padding:16px 22px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid #374151}
 h1{font-size:1.15rem;margin:0} .small{font-size:.9rem;color:var(--muted)}
 main{width:min(1100px,100%);margin:auto;padding:24px;display:flex;flex-direction:column;gap:18px;flex:1}
-.toolbar,.controls{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
-button,.filelabel{border:0;border-radius:10px;padding:12px 18px;font-size:1rem;font-weight:650;cursor:pointer;background:#374151;color:white}
+.toolbar,.controls{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+button,.filelabel{border:0;border-radius:10px;padding:10px 16px;font-size:0.95rem;font-weight:650;cursor:pointer;background:#374151;color:white}
 button:hover,.filelabel:hover{filter:brightness(1.15)} button.primary{background:var(--accent);color:#111827}
 button:disabled{opacity:.35;cursor:not-allowed}
 .filelabel{display:inline-block;background:#374151}
 input[type=file]{display:none}
 
-/* Estilo do Seletor Múltiplo de Personagens */
-.character-select-container {
+/* Estilos de Opções e Seleção */
+.character-select-container, .options-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
 }
 .character-checkboxes {
-  max-height: 120px;
+  max-height: 110px;
   overflow-y: auto;
   background: #374151;
   border: 1px solid #4b5563;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 220px;
+  gap: 4px;
+  min-width: 200px;
 }
-.character-checkboxes label {
+.character-checkboxes label, .option-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  font-size: 0.85rem;
   cursor: pointer;
 }
 
-#stage{background:var(--panel);border:1px solid #374151;border-radius:20px;min-height:48vh;padding:clamp(22px,5vw,40px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:18px;box-shadow:0 15px 50px #0003}
+.num-input {
+  width: 55px;
+  background: #374151;
+  color: white;
+  border: 1px solid #4b5563;
+  padding: 6px;
+  border-radius: 6px;
+  text-align: center;
+}
 
-/* Estilos das falas de contexto (anterior/posterior) */
+#stage{background:var(--panel);border:1px solid #374151;border-radius:20px;min-height:48vh;padding:clamp(22px,5vw,40px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;box-shadow:0 15px 50px #0003}
+
+/* Estilos do Bloco de Contexto */
+.context-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
 .context-speech {
-  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
-  color: #6b7280; /* Cinza clarinho/médio */
-  max-width: 800px;
-  line-height: 1.3;
+  font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+  color: #6b7280;
+  max-width: 850px;
+  margin: auto;
+  line-height: 1.35;
   font-style: italic;
 }
 .context-speaker {
@@ -65,14 +81,24 @@ input[type=file]{display:none}
   text-transform: uppercase;
   font-size: 0.85em;
   margin-right: 4px;
+  color: #9ca3af;
 }
 
 #character{font-size:clamp(1.2rem,3vw,2rem);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-#speech{font-size:clamp(1.5rem,3.5vw,2.5rem);line-height:1.45;white-space:pre-wrap;max-width:900px}
+#speech{font-size:clamp(1.4rem,3.2vw,2.4rem);line-height:1.45;white-space:pre-wrap;max-width:900px}
+#hint-message{font-size:0.85rem;color:var(--muted);font-style:italic;min-height:18px}
 #counter{color:var(--muted);text-align:center}
 #message{color:#d1d5db;text-align:center;line-height:1.5}
 #progress{height:5px;background:#374151;border-radius:99px;overflow:hidden}
 #bar{height:100%;width:0;background:var(--accent);transition:width .15s}
+
+.jump-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
 footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
 @media(max-width:600px){main{padding:12px}#stage{min-height:52vh}.controls button{flex:1}}
 </style>
@@ -94,28 +120,53 @@ footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
       </div>
     </div>
 
+    <div class="options-container">
+      <label class="option-label">
+        <input type="checkbox" id="defaultHide">
+        Ocultar fala por padrão
+      </label>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <label class="option-label">
+          Antes:
+          <input type="number" id="contextBefore" class="num-input" value="1" min="0" max="10">
+        </label>
+        <label class="option-label">
+          Depois:
+          <input type="number" id="contextAfter" class="num-input" value="1" min="0" max="10">
+        </label>
+      </div>
+    </div>
+
     <button id="shuffle" title="Recomeçar do início">Recomeçar</button>
   </div>
   <div id="message">Abra seu arquivo Word para começar. O arquivo é processado no seu navegador.</div>
   
   <div id="stage" aria-live="polite">
-    <!-- Fala Anterior -->
-    <div id="prev-speech" class="context-speech"></div>
+    <!-- Falas Anteriores -->
+    <div id="prev-container" class="context-block"></div>
     
     <!-- Fala Atual -->
     <div id="character">Pronto para ensaiar?</div>
     <div id="speech">Carregue o documento Word para ver uma fala de cada vez.</div>
+    <div id="hint-message"></div>
     
-    <!-- Fala Posterior -->
-    <div id="next-speech" class="context-speech"></div>
+    <!-- Falas Posteriores -->
+    <div id="next-container" class="context-block"></div>
   </div>
 
   <div id="progress"><div id="bar"></div></div>
   <div id="counter">Nenhuma fala carregada</div>
+  
   <div class="controls">
     <button id="prev" disabled>← Anterior</button>
     <button id="hide">Ocultar fala</button>
     <button id="next" class="primary" disabled>Próxima fala →</button>
+    
+    <div class="jump-container">
+      <label for="jumpInput">Ir para fala:</label>
+      <input type="number" id="jumpInput" class="num-input" min="1" placeholder="Nº">
+      <button id="jumpBtn">Ir</button>
+    </div>
   </div>
 </main>
 <footer>O arquivo não é enviado para um servidor. Separe as falas por travessão ou dois-pontos (ex.: Personagem — Fala ou Personagem: Fala).</footer>
@@ -126,12 +177,10 @@ let detectedCharacters = [];
 
 const $ = id => document.getElementById(id);
 
-// Função para remover acentos e padronizar textos
 function norm(s) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
-// Processa parágrafos identificando travessões, dois pontos e novos personagens automaticamente
 function parseParagraphs(paragraphs) {
   const out = [];
   let current = null;
@@ -149,14 +198,12 @@ function parseParagraphs(paragraphs) {
     let p = raw.replace(/\u00a0/g, " ").trim();
     if (!p) continue;
 
-    // Regex flexível para identificar: "NOME: fala", "NOME — fala", "NOME - fala", "NOME – fala"
     const match = p.match(/^([A-ZÀ-Úa-zà-ú0-9\s]+?)\s*[:：\-–—]\s*(.*)$/);
 
     if (match) {
       const charCandidate = match[1].trim();
       const speechText = match[2].trim();
 
-      // Ignora correspondências falsas muito longas
       if (charCandidate.length > 0 && charCandidate.length < 35) {
         flush();
         current = charCandidate;
@@ -178,12 +225,10 @@ function parseParagraphs(paragraphs) {
   return out;
 }
 
-// Atualiza a lista de caixas de seleção dos personagens
 function updateCharacterCheckboxes() {
   const container = $("characterList");
   container.innerHTML = "";
 
-  // Opção "Todos"
   const allLabel = document.createElement("label");
   allLabel.innerHTML = `<input type="checkbox" id="chk-all" checked> <strong>[Todos os personagens]</strong>`;
   container.appendChild(allLabel);
@@ -194,13 +239,12 @@ function updateCharacterCheckboxes() {
     container.appendChild(lbl);
   });
 
-  // Event Listeners
   const allChk = $("chk-all");
   const charChks = document.querySelectorAll(".char-chk");
 
   allChk.addEventListener("change", () => {
     charChks.forEach(c => c.checked = false);
-    if (!allChk.checked) allChk.checked = true; // Mantém "Todos" se desmarcar sem escolher outro
+    if (!allChk.checked) allChk.checked = true;
     applyFilter();
   });
 
@@ -220,11 +264,12 @@ function applyFilter() {
   if (allChk.checked || selected.length === 0) {
     speeches = [...allSpeeches];
   } else {
+    // Mantém estritamente a ordem cronológica original do texto
     speeches = allSpeeches.filter(s => selected.includes(norm(s.character)));
   }
 
   index = 0;
-  hidden = false;
+  hidden = $("defaultHide").checked;
   render();
 }
 
@@ -232,36 +277,52 @@ function render() {
   if (!speeches.length) {
     $("character").textContent = "Nenhuma fala encontrada";
     $("speech").textContent = "Confira o formato do documento ou a seleção de personagens.";
-    $("prev-speech").textContent = "";
-    $("next-speech").textContent = "";
+    $("prev-container").innerHTML = "";
+    $("next-container").innerHTML = "";
+    $("hint-message").textContent = "";
     $("counter").textContent = "0 falas";
     return;
   }
 
   const item = speeches[index];
-
-  // Identifica o índice da fala atual na lista completa (allSpeeches) para renderizar o contexto
   const globalIdx = allSpeeches.indexOf(item);
 
-  // Contexto da fala anterior
-  if (globalIdx > 0) {
-    const prevItem = allSpeeches[globalIdx - 1];
-    $("prev-speech").innerHTML = `<span class="context-speaker">${prevItem.character}:</span> "${prevItem.text}"`;
-  } else {
-    $("prev-speech").textContent = "";
+  const numBefore = parseInt($("contextBefore").value) || 0;
+  const numAfter = parseInt($("contextAfter").value) || 0;
+
+  // Renderizar Falas Anteriores
+  const prevContainer = $("prev-container");
+  prevContainer.innerHTML = "";
+  const startBefore = Math.max(0, globalIdx - numBefore);
+  for (let i = startBefore; i < globalIdx; i++) {
+    const prevItem = allSpeeches[i];
+    const div = document.createElement("div");
+    div.className = "context-speech";
+    div.innerHTML = `<span class="context-speaker">${prevItem.character}:</span> "${prevItem.text}"`;
+    prevContainer.appendChild(div);
   }
 
-  // Contexto da fala seguinte
-  if (globalIdx >= 0 && globalIdx < allSpeeches.length - 1) {
-    const nextItem = allSpeeches[globalIdx + 1];
-    $("next-speech").innerHTML = `<span class="context-speaker">${nextItem.character}:</span> "${nextItem.text}"`;
-  } else {
-    $("next-speech").textContent = "";
+  // Renderizar Falas Posteriores
+  const nextContainer = $("next-container");
+  nextContainer.innerHTML = "";
+  const endAfter = Math.min(allSpeeches.length - 1, globalIdx + numAfter);
+  for (let i = globalIdx + 1; i <= endAfter; i++) {
+    const nextItem = allSpeeches[i];
+    const div = document.createElement("div");
+    div.className = "context-speech";
+    div.innerHTML = `<span class="context-speaker">${nextItem.character}:</span> "${nextItem.text}"`;
+    nextContainer.appendChild(div);
   }
 
-  // Fala atual
+  // Renderizar Fala Atual
   $("character").textContent = item.character;
-  $("speech").textContent = hidden ? "••••••••••••••••••••\n\n(Tente lembrar a fala e clique em “Revelar fala”)" : item.text;
+  if (hidden) {
+    $("speech").textContent = "••••••••••••••••••••";
+    $("hint-message").textContent = "(Tente lembrar a fala e clique em “Revelar fala” ou aperte H)";
+  } else {
+    $("speech").textContent = item.text;
+    $("hint-message").textContent = "";
+  }
   $("hide").textContent = hidden ? "Revelar fala" : "Ocultar fala";
 
   $("prev").disabled = index === 0;
@@ -272,8 +333,17 @@ function render() {
 
 function move(n) {
   index = Math.max(0, Math.min(speeches.length - 1, index + n));
-  hidden = false;
+  hidden = $("defaultHide").checked;
   render();
+}
+
+function jumpToSpeech() {
+  const target = parseInt($("jumpInput").value);
+  if (!target || target < 1 || target > speeches.length) return;
+  index = target - 1;
+  hidden = $("defaultHide").checked;
+  render();
+  $("jumpInput").value = "";
 }
 
 $("file").addEventListener("change", async e => {
@@ -294,7 +364,6 @@ $("file").addEventListener("change", async e => {
       allSpeeches = paras.filter(x => x.trim()).map(x => ({ character: "(Identificação necessária)", text: x.trim() }));
     }
 
-    // Extrai a lista única de personagens identificados no arquivo
     const charMap = new Map();
     allSpeeches.forEach(s => {
       const nKey = norm(s.character);
@@ -308,7 +377,7 @@ $("file").addEventListener("change", async e => {
 
     speeches = [...allSpeeches];
     index = 0;
-    hidden = false;
+    hidden = $("defaultHide").checked;
     $("message").textContent = `Arquivo: ${file.name}. Foram encontradas ${allSpeeches.length} falas e ${detectedCharacters.length} personagens.`;
     render();
   } catch (err) {
@@ -318,8 +387,18 @@ $("file").addEventListener("change", async e => {
 
 $("prev").addEventListener("click", () => move(-1));
 $("next").addEventListener("click", () => move(1));
-$("shuffle").addEventListener("click", () => { index = 0; hidden = false; render(); });
+$("shuffle").addEventListener("click", () => { index = 0; hidden = $("defaultHide").checked; render(); });
 $("hide").addEventListener("click", () => { if (!speeches.length) return; hidden = !hidden; render(); });
+
+$("jumpBtn").addEventListener("click", jumpToSpeech);
+$("jumpInput").addEventListener("keydown", e => { if (e.key === "Enter") jumpToSpeech(); });
+
+$("contextBefore").addEventListener("change", render);
+$("contextAfter").addEventListener("change", render);
+$("defaultHide").addEventListener("change", () => {
+  hidden = $("defaultHide").checked;
+  render();
+});
 
 document.addEventListener("keydown", e => {
   if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
