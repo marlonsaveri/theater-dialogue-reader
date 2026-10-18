@@ -14,7 +14,7 @@
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;display:flex;flex-direction:column}
 header{padding:16px 22px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid #374151}
 h1{font-size:1.15rem;margin:0} .small{font-size:.9rem;color:var(--muted)}
-main{width:min(1100px,100%);margin:auto;padding:24px;display:flex;flex-direction:column;gap:18px;flex:1}
+main{width:min(1150px,100%);margin:auto;padding:24px;display:flex;flex-direction:column;gap:18px;flex:1}
 .toolbar,.controls{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
 button,.filelabel{border:0;border-radius:10px;padding:10px 16px;font-size:0.95rem;font-weight:650;cursor:pointer;background:#374151;color:white}
 button:hover,.filelabel:hover{filter:brightness(1.15)} button.primary{background:var(--accent);color:#111827}
@@ -22,7 +22,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .filelabel{display:inline-block;background:#374151}
 input[type=file]{display:none}
 
-.character-select-container, .options-container {
+.character-select-container, .options-container, .context-box {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -38,7 +38,7 @@ input[type=file]{display:none}
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 200px;
+  min-width: 190px;
 }
 .character-checkboxes label, .option-label {
   display: flex;
@@ -48,12 +48,28 @@ input[type=file]{display:none}
   cursor: pointer;
 }
 
+/* Caixa delimitada para o contexto */
+.context-box {
+  background: #1f2937;
+  border: 1px dashed #4b5563;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.context-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
 .num-input {
-  width: 55px;
+  width: 50px;
   background: #374151;
   color: white;
   border: 1px solid #4b5563;
-  padding: 6px;
+  padding: 4px;
   border-radius: 6px;
   text-align: center;
 }
@@ -118,17 +134,23 @@ footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
     </div>
 
     <div class="options-container">
-      <label class="option-label">
+      <span class="small">Modo de Ensaio:</span>
+      <label class="option-label" style="background:#374151; padding:8px 12px; border-radius:8px; border:1px solid #4b5563; min-width:180px;">
         <input type="checkbox" id="defaultHide">
         Ocultar fala por padrão
       </label>
-      <div style="display:flex; gap:10px; align-items:center;">
+    </div>
+
+    <!-- Bloco claro e separado para o Contexto -->
+    <div class="context-box">
+      <span class="context-title">Falas de Contexto</span>
+      <div style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
         <label class="option-label">
-          Antes:
+          Mostrar anterior(es):
           <input type="number" id="contextBefore" class="num-input" value="1" min="0" max="10">
         </label>
         <label class="option-label">
-          Depois:
+          Mostrar posterior(es):
           <input type="number" id="contextAfter" class="num-input" value="1" min="0" max="10">
         </label>
       </div>
@@ -176,14 +198,12 @@ function norm(s) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
-// Gera cores distintas baseadas no nome do personagem
 function generateColor(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
   const h = Math.abs(hash) % 360;
-  // Mantém saturação alta (75%) e luminosidade boa (65%) para destacar bem no fundo escuro
   return `hsl(${h}, 75%, 65%)`;
 }
 
@@ -370,7 +390,7 @@ $("file").addEventListener("change", async e => {
 
     allSpeeches = parseParagraphs(paras);
 
-    if (!allSpeeches.length) {
+    if (!allSpeeces.length) {
       allSpeeches = paras.filter(x => x.trim()).map(x => ({ character: "(Identificação necessária)", text: x.trim() }));
     }
 
